@@ -1,0 +1,67 @@
+# 配置文件路径：src/main/resources/application.yml
+
+spring :
+  application:
+    # 应用名称
+    name: scrow-life-backend
+  profiles:
+    # 激活指定环境的profile，可选值有：dev、test、prod
+    active: dev
+  jackson:
+    # 让controller接口返回的实体类中驼峰命名的字段转为下划线命名格式
+    property-naming-strategy: SNAKE_CASE
+  mail:
+    # 邮箱相关服务配置
+    host: smtp.qq.com
+    port: 587          # TLS端口，推荐；SSL用465
+    username: 1091479495@qq.com
+    password: itfoqxdvpsoxfede   # ← 从环境变量注入授权码，不要明文！
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+      mail.smtp.connectiontimeout: 15000
+      mail.smtp.timeout: 15000
+      mail.smtp.writetimeout: 15000
+  data: # Spring Boot 2.x+ 推荐写法
+    # redis配置
+    redis:
+      host: 192.168.100.128
+      port: 6379
+      password: 1234
+      database: 0
+  # mysql配置
+  datasource:
+    url: jdbc:mysql://192.168.100.128:3306/codeyell
+    username: root
+    password: 1234
+
+# 邮箱验证码配置
+verify-code:
+  # 验证码有效期分钟
+  expire-minutes: 5
+  # 验证码长度
+  length: 6
+
+
+mybatis-plus:
+  # 指定 Mapper XML 文件的位置
+  mapper-locations: classpath:mapper/**/*.xml
+
+  # 全局配置（定义全局的默认行为）
+  global-config:
+    db-config:
+      # 全局主键策略：AUTO(数据库自增), ASSIGN_ID(雪花算法), INPUT(手动输入)
+      id-type: auto
+      # 逻辑删除配置（此配置是全局配置，而使用@TableLogic来定义逻辑删除是局部配置）
+      logic-delete-field: deleted  # 逻辑删除的字段名
+      logic-delete-value: 1        #  逻辑已删除时的值（默认为 1）
+      logic-not-delete-value: 0    # 逻辑未删除的值（默认为 0）
+      # 更新策略：not_null（默认值）只更新接口传参的非空字段
+      update-strategy: not_null
+
+  # 原生 MyBatis 配置
+  configuration:
+    # 开启驼峰命名自动映射（数据库 user_name 自动映射到实体 userName）
+    map-underscore-to-camel-case: true
+    # 开发环境打印完整 SQL 日志（生产环境建议关闭，影响性能）
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

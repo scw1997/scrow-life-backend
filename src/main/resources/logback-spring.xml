@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- 引用 Spring Boot 默认配置（包含 CONSOLE_LOG_PATTERN 等变量） -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <property name="LOG_PATH" value="./logs"/>
+    <property name="APP_NAME" value="my-service"/>
+
+    <!-- 设置日志通过控制台输出（开发环境） -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!--设置日志输出的格式：%d表示时间，%thread表示线程名，%-5level表示日志级别（使用5位宽度），%logger{36}表示日志记录器的名称（最多显示36位，超过则自动简化），%msg表示日志消息，%n表示换行符 -->         -->
+            <pattern> %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
+<!--            <pattern>${CONSOLE_LOG_PATTERN}</pattern>-->
+        </encoder>
+    </appender>
+
+    <!-- 设置日志通过文件输出 + 滚动策略 -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/${APP_NAME}.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 设置日志文件名格式，%d{yyyy-MM-dd}表示按天滚动，%i表示日志文件编号 -->
+            <fileNamePattern>${LOG_PATH}/${APP_NAME}.%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>      <!-- 单文件上限，超过则滚动到新文件 -->
+            <maxHistory>30</maxHistory>           <!-- 保留天数 -->
+            <totalSizeCap>10GB</totalSizeCap>     <!-- 总大小上限 -->
+        </rollingPolicy>
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 异步写入（生产必配，避免IO阻塞业务线程） -->
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>1024</queueSize>
+        <discardingThreshold>0</discardingThreshold> <!-- 队列满时不丢弃 -->
+        <neverBlock>true</neverBlock>                <!-- 永不阻塞调用线程 -->
+        <appender-ref ref="FILE"/>
+    </appender>
+
+    <!-- 按环境区分日志配置 -->
+    <!--  开发环境-->
+    <springProfile name="dev">
+        <!--  设置日志级别（大于等于此级别的日志才会被输出）    -->
+        <root level="INFO">
+            <appender-ref ref="STDOUT"/>
+        </root>
+    </springProfile>
+    <!--  生产环境-->
+    <springProfile name="prod">
+        <!--  设置日志级别（大于等于此级别的日志才会被输出）    -->
+        <root level="INFO">
+            <!-- 引用上面的通过异步写入输出的配置         -->
+            <appender-ref ref="ASYNC_FILE"/>
+        </root>
+        <!-- 降低框架噪音 -->
+        <logger name="org.springframework" level="WARN"/>
+        <logger name="com.zaxxer.hikari" level="WARN"/>
+    </springProfile>
+</configuration>
