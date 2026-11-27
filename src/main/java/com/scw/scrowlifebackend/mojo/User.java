@@ -4,13 +4,12 @@ package com.scw.scrowlifebackend.mojo;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.*;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 @Data
-@AllArgsConstructor
+@RequiredArgsConstructor
 @TableName("sys_user")
 public class User {
     @TableId(type = IdType.AUTO)
@@ -25,5 +24,5 @@ public class User {
     private String avatar;
     private String createdAt;
     private String updatedAt;
-    private String deletedAt;
+    private Integer isDelete; // 0: false, 1: true
 }

@@ -61,11 +61,6 @@ public final class Jwt {
         return builder.compact(); // 触发编码与签名，输出最终Token字符串
     }
 
-    /**
-     * 解析并验证 JWT Token
-     * @param token JWT 字符串
-     * @return Claims 载荷对象
-     */
     public static Claims parseToken(String token) {
         try {
             return Jwts.parserBuilder()
@@ -80,11 +75,6 @@ public final class Jwt {
         }
     }
 
-    /**
-     * 仅判断 Token 是否有效（常用于拦截器/过滤器）
-     * @param token JWT 字符串
-     * @return true-有效，false-无效
-     */
     public static boolean validateToken(String token) {
         try {
             parseToken(token);
@@ -94,11 +84,7 @@ public final class Jwt {
         }
     }
 
-    /**
-     * 从 Token 中提取特定字段
-     * @param token JWT 字符串
-     * @return 主题信息
-     */
+
     public static String getUsernameFromToken(String token) {
         return parseToken(token).getSubject();
     }

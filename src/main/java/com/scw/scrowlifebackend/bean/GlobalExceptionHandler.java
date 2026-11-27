@@ -1,34 +1,20 @@
 package com.scw.scrowlifebackend.bean;
 
 
+import com.scw.scrowlifebackend.mojo.MyException;
 import com.scw.scrowlifebackend.mojo.Response;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.List;
 import java.util.stream.Collectors;
-
 
 
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
-
-
-    @Data
-    @AllArgsConstructor
-    public static class FieldError {
-        private String field;
-        private String message;
-        private Object rejectedValue;
-    }
-
 
     // 处理 @Valid接口字段参数校验失败,通常默认情况下自动返回400
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -36,22 +22,35 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.OK)
     public Response handleValidation(
             MethodArgumentNotValidException ex) {
-
-        List<FieldError> errors = ex.getBindingResult()
+        String errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(e -> new FieldError(
-                        e.getField(),           // 字段名: "address.city"
-                        e.getDefaultMessage(),  // 校验消息
-                        e.getRejectedValue()    // 非法值（可选）
-                ))
-                .collect(Collectors.toList());
+                .map(e ->
+                        e.getField() + " " +
+                        e.getDefaultMessage() // 校验消息
+                )
+                //map后通过collect将stream转换成集合后再通过join连接成字符串
+                .collect(Collectors.joining(", "));
 
         log.warn("参数校验失败: {}", errors);
         //设置报错时返回数据格式
         return Response.error(errors.toString());
     }
 
+    // service层逻辑判断后自主抛出的异常
+    @ExceptionHandler(MyException.class)
+    public Response handleMyException(MyException e) {
+        log.error("MyException抛出异常", e);  // 完整日志进服务端
+        return  Response.error(e.getCode(),e.getMessage());
+    }
+
+
+    // 兜底：未预期异常 → 500，不暴露堆栈
+    @ExceptionHandler(Exception.class)
+    public Response handleUnknown(Exception e) {
+        log.error("未预期异常", e);  // 完整日志进服务端
+        return  Response.error(500,e.getMessage());
+    }
 
 
 

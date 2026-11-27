@@ -31,7 +31,7 @@ spring :
       database: 0
   # mysql配置
   datasource:
-    url: jdbc:mysql://192.168.100.128:3306/codeyell
+    url: jdbc:mysql://192.168.100.128:3306/scrow-life-backend
     username: root
     password: 1234
 
@@ -53,7 +53,7 @@ mybatis-plus:
       # 全局主键策略：AUTO(数据库自增), ASSIGN_ID(雪花算法), INPUT(手动输入)
       id-type: auto
       # 逻辑删除配置（此配置是全局配置，而使用@TableLogic来定义逻辑删除是局部配置）
-      logic-delete-field: deleted  # 逻辑删除的字段名
+      logic-delete-field: is_delete  # 逻辑删除的字段名
       logic-delete-value: 1        #  逻辑已删除时的值（默认为 1）
       logic-not-delete-value: 0    # 逻辑未删除的值（默认为 0）
       # 更新策略：not_null（默认值）只更新接口传参的非空字段
@@ -65,3 +65,9 @@ mybatis-plus:
     map-underscore-to-camel-case: true
     # 开发环境打印完整 SQL 日志（生产环境建议关闭，影响性能）
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+
+# 开启事务管理的底层日志
+logging:
+  level:
+    org.springframework.jdbc.support.JdbcTransactionManager: debug

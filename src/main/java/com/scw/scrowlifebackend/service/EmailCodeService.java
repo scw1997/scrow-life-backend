@@ -47,6 +47,7 @@ public class EmailCodeService {
         emailSender.send(message);
         // 设置指定过期时间
         redisTemplate.opsForValue().set(redisMailCodeKey,code,expires,TimeUnit.MINUTES);
+        log.info("获取验证码1: {}", redisMailCodeKey,redisTemplate.opsForValue().get(redisMailCodeKey));
         //设置60s发送间隔
         redisTemplate.opsForValue().set(redisMailCodeRateKey, "1", 60, TimeUnit.SECONDS);
 
@@ -57,6 +58,7 @@ public class EmailCodeService {
     public Boolean checkCode(String code,String toEmail){
         String redisMailCodeKey = "email:code:"+ toEmail;
         String existedCode = redisTemplate.opsForValue().get(redisMailCodeKey);
+        log.info("获取验证码2: {},{}", redisMailCodeKey,existedCode);
         if(existedCode!=null && existedCode.equals(code)){
             return  true;
         }
